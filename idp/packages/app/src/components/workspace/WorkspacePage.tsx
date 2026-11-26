@@ -5,6 +5,7 @@ import { catalogApiRef } from '@backstage/plugin-catalog-react';
 import { Entity, RELATION_DEPENDENCY_OF } from '@backstage/catalog-model';
 import { Page, Header, Content, InfoCard, Progress, Link } from '@backstage/core-components';
 import { Grid, List, ListItem, ListItemIcon, Chip, Typography, Box, TextField, Collapse, IconButton, Divider, Button } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import GitHubIcon from '@material-ui/icons/GitHub';
@@ -50,12 +51,26 @@ const RESOURCE_CATEGORIES = [
   { key: 'git-repository', label: 'Git' },
 ];
 
+const useStyles = makeStyles(theme => ({
+  resourceTypeCard: {
+    borderRadius: '50% / 96px',
+    padding: theme.spacing(3, 2, 4),
+  },
+  resourceTypeHeader: {
+    textAlign: 'center',
+  },
+  resourceDetailsCard: {
+    borderRadius: '24px 6px 24px 6px',
+  },
+}));
+
 const getEntityCatalogPath = (entity: Entity) => {
   const ns = entity.metadata.namespace || 'default';
   return `/catalog/${ns}/${entity.kind.toLowerCase()}/${entity.metadata.name}`;
 };
 
 export const WorkspacePage = () => {
+  const classes = useStyles();
   const catalogApi = useApi(catalogApiRef);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -91,7 +106,12 @@ export const WorkspacePage = () => {
         {loading ? <Progress /> : (
           <Grid container spacing={3}>
             <Grid item xs={12} md={3}>
-              <InfoCard title="Resource Type">
+              <InfoCard
+                title="Resource Type"
+                divider={false}
+                className={classes.resourceTypeCard}
+                headerProps={{ className: classes.resourceTypeHeader }}
+              >
                 <Box mb={2}>
                   <TextField fullWidth size="small" variant="outlined" placeholder="Search resources..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                 </Box>
@@ -129,7 +149,7 @@ export const WorkspacePage = () => {
                   const entityPath = getEntityCatalogPath(entity);
                   return (
                     <Box key={entity.metadata.name} mb={2}>
-                      <InfoCard>
+                      <InfoCard className={classes.resourceDetailsCard}>
                         <Box display="flex" justifyContent="space-between" alignItems="center">
                           <Box display="flex" alignItems="center" style={{ gap: 10 }}>
                             {children.length > 0 && (
@@ -151,7 +171,15 @@ export const WorkspacePage = () => {
                         </Box>
                         {repoLink && (
                           <Box mt={1}>
-                            <Button size="small" startIcon={<GitHubIcon />} href={repoLink} target="_blank">{repoLink}</Button>
+                            <Button
+                              size="small"
+                              startIcon={<GitHubIcon />}
+                              href={repoLink}
+                              target="_blank"
+                              style={{ textTransform: 'lowercase' }}
+                            >
+                              {repoLink}
+                            </Button>
                           </Box>
                         )}
                         {children.length > 0 && (
