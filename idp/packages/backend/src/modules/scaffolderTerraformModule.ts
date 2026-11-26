@@ -58,8 +58,10 @@ const createModuleDeclaration = ({
   }
 
   if (cloudProvider === 'gcp') {
-    const projectId = useModuleProjectId ? '' : '  project_id   = var.gcp_project_id\n';
-    return `module "${moduleName}" {\n  source = "${source}"\n\n  region       = var.gcp_region\n${projectId}  environment  = "dev"\n  billing_code = "448325"\n}\n`;
+    if (useModuleProjectId) {
+      return `module "${moduleName}" {\n  source = "${source}"\n\n  region              = var.gcp_region\n  gcp_org_id          = var.gcp_org_id\n  gcp_billing_account = var.gcp_billing_account\n  environment         = "dev"\n  billing_code        = "448325"\n}\n`;
+    }
+    return `module "${moduleName}" {\n  source = "${source}"\n\n  region       = var.gcp_region\n  project_id   = var.gcp_project_id\n  environment  = "dev"\n  billing_code = "448325"\n}\n`;
   }
 
   if (cloudProvider === 'azure') {
@@ -140,19 +142,22 @@ const scaffolderTerraformModule = createBackendModule({
                 throw new Error(`Module ${moduleName} does not reference the expected ${folder} folder on main.`);
               }
               const [, owner, repo] = source;
-              const expected = createModuleDeclaration({
+              const moduleInputs = {
                 serviceName,
                 cloudProvider,
                 iacRepository: { owner, repo },
-              });
+              };
               const normalize = (text: string) =>
                 text
                   .split(/\r?\n/)
                   .map(line => line.trim().replace(/^([a-z_]+)\s*=\s*/, '$1 = '))
                   .filter(Boolean)
                   .join('\n');
-              const expectedWithModuleProjectId = expected.replace('  project_id   = var.gcp_project_id\n', '');
-              if (![expected, expectedWithModuleProjectId].some(candidate => normalize(block) === normalize(candidate))) {
+              const expected = [
+                createModuleDeclaration(moduleInputs),
+                createModuleDeclaration({ ...moduleInputs, useModuleProjectId: true }),
+              ];
+              if (!expected.some(candidate => normalize(block) === normalize(candidate))) {
                 throw new Error(`Module ${moduleName} has been customized. Review and remove it in GitHub.`);
               }
 
