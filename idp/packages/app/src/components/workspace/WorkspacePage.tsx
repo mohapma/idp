@@ -53,14 +53,11 @@ const RESOURCE_CATEGORIES = [
 
 const useStyles = makeStyles(theme => ({
   resourceTypeCard: {
-    borderRadius: '50% / 96px',
-    padding: theme.spacing(3, 2, 4),
-  },
-  resourceTypeHeader: {
-    textAlign: 'center',
+    borderRadius: '24px 6px 24px 6px',
   },
   resourceDetailsCard: {
-    borderRadius: '24px 6px 24px 6px',
+    borderRadius: '48px / 50%',
+    paddingInline: theme.spacing(3),
   },
 }));
 
@@ -108,9 +105,7 @@ export const WorkspacePage = () => {
             <Grid item xs={12} md={3}>
               <InfoCard
                 title="Resource Type"
-                divider={false}
                 className={classes.resourceTypeCard}
-                headerProps={{ className: classes.resourceTypeHeader }}
               >
                 <Box mb={2}>
                   <TextField fullWidth size="small" variant="outlined" placeholder="Search resources..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
